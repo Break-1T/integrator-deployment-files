@@ -1,0 +1,9 @@
+1) install kubernetes
+2) install docker
+3) enable k8s services in docker
+4) run: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+5) run: kubectl apply -f "k8s-desktop\cluster-role-binding.yaml"
+6) run: kubectl apply -f "k8s-desktop\k8s-dashboard-service-account.yaml"
+7) get token: kubectl create token admin-user -n kubernetes-dashboard
+8) run kubernetes dashboard: kubectl proxy
+9) open: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/pod?namespace=kubernetes-dashboard

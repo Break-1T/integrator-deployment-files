@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: integration
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      dnsConfig:
+          options:
+            - name: ndots
+              value: "1"
+      containers:
+        - name: postgres
+          image: 'postgres:14'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-secret
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdata
+          # resources:
+          #   requests:
+          #     memory: 500Mi
+          #     cpu: 500m
+          #   limits:
+          #     memory: 1Gi
+          #     cpu: 1Gi
+               
+      volumes:
+        - name: postgresdata
+          persistentVolumeClaim:
+            claimName: postgres-volume-claim
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: integration
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+  selector:
+    app: postgres
+
+#kubectl -n integration port-forward service/postgres 8888:5432
