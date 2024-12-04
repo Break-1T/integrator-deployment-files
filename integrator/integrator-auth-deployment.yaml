@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  ui-back
+  name:  auth
   namespace: integration
   labels:
-    app:  ui-back
+    app:  auth
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ui-back
+      app: auth
   template:
     metadata:
       labels:
-        app: ui-back
+        app: auth
     spec:
       serviceAccountName: integration-user
       dnsConfig:
@@ -21,23 +21,42 @@ spec:
           - name: ndots
             value: "1"
       containers:
-      - name: ui-back
-        image: taraskrupko/integrator-ui-back:1.0.1
+      - name: auth
+        image: taraskrupko/integrator-auth:1.0.1
         imagePullPolicy: Always
         env:
-          - name: IDENTITY_SERVER__URL
-            value: "http://auth.integration.svc.cluster.local"
-          - name: IDENTITY_SERVER__CLIENT_ID
+          - name: DB_SERVER
+            valueFrom:
+              secretKeyRef:
+                name: pgsql-secret
+                key: instance
+          - name: DB_PORT
+            value: "5432" # порт базы данных
+          - name: DB_NAME
+            value: "integrator_auth" # имя базы данных
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: pgsql-secret
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: pgsql-secret
+                key: password
+          - name: ConnectionStrings__PostgresConnection
+            value: "Server=$(DB_SERVER);Port=$(DB_PORT);Database=$(DB_NAME);User Id=$(DB_USER);Password=$(DB_PASSWORD);"
+          - name: CLIENT_ID
             valueFrom:
               secretKeyRef:
                 name: auth-secret
                 key: CLIENT_ID
-          - name: IDENTITY_SERVER__CLIENT_SECRET
+          - name: CLIENT_SECRET
             valueFrom:
               secretKeyRef:
                 name: auth-secret
                 key: CLIENT_SECRET
-          - name: IDENTITY_SERVER__CLIENT_NAME
+          - name: CLIENT_NAME
             valueFrom:
               secretKeyRef:
                 name: auth-secret
@@ -66,13 +85,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ui-back
+  name: auth
   namespace: integration
   labels:
-    app: ui-back
+    app: auth
 spec:
   selector:
-    app: ui-back
+    app: auth
   type: ClusterIP
   ports:
   - protocol: TCP 

@@ -1,0 +1,5 @@
+helm repo add kubeview https://benc-uk.github.io/kubeview/charts
+helm repo update
+helm install kubeview kubeview/kubeview --namespace kubeview --create-namespace
+
+kubectl port-forward -n kubeview svc/kubeview 8080:80

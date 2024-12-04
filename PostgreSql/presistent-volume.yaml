@@ -6,25 +6,24 @@ metadata:
     type: local
     app: postgres
 spec:
-  storageClassName: local-storage
+  storageClassName: hostpath
   capacity:
     storage: 1Gi
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: /data/postgresql
+    path: /var/lib/docker/volumes/postgres_data/_data
 
 ---
 
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: integration
   name: postgres-volume-claim
   labels:
     app: postgres
 spec:
-  storageClassName: local-storage
+  storageClassName: hostpath
   accessModes:
     - ReadWriteMany
   resources:

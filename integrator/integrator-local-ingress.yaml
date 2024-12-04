@@ -12,13 +12,6 @@ spec:
   - host: integrator.local  # Set your desired host
     http:
       paths:
-      - path: /postgres.integration(/|$)(.*)  # Path to access PostgreSQL service. Match /postgres and everything after
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: postgres  # Service name for PostgreSQL
-            port:
-              number: 5432
       - path: /ui-back.integration(/|$)(.*)  # Path to access another service. Match /ui-back and everything after
         pathType: ImplementationSpecific
         backend:
