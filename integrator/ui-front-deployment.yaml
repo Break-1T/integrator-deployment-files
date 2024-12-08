@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  ui-front
+  namespace: integration
+  labels:
+    app: ui-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-front
+  template:
+    metadata:
+      labels:
+        app: ui-front
+    spec:
+      serviceAccountName: integration-user
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+      - name: ui-front
+        image: taraskrupko/integrator-ui-front:1.0.1
+        imagePullPolicy: Always
+        env:
+          - name: VITE_INTEGRATOR_API_URL
+            value: http://tkrupko-integrator.api/
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 250m
+            memory: 250Mi
+        livenessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+          httpGet:
+            path: '/health'
+            port: http
+        ports:
+        - containerPort: 8081
+          name: http
+      imagePullSecrets:
+        - name: regcred
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-front
+  namespace: integration
+  labels:
+    app: ui-front
+spec:
+  selector:
+    app: ui-front
+  type: ClusterIP
+  ports:
+  - protocol: TCP 
+    port: 80
+    targetPort: 8081
